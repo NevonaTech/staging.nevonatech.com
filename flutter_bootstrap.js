@@ -36,4 +36,25 @@ if (!window._flutter) {
 _flutter.buildConfig = {"engineRevision":"a10d8ac38de835021c8d2f920dbf50a920ccc030","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}]};
 
 
-_flutter.loader.load();
+async function unregisterStaleServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) {
+    return;
+  }
+
+  await navigator.serviceWorker.register(
+    "flutter_service_worker.js?v=cleanup-20260630",
+  );
+}
+
+unregisterStaleServiceWorker()
+  .catch((error) => {
+    console.warn("Failed to unregister stale service worker:", error);
+  })
+  .finally(() => {
+    _flutter.loader.load();
+  });
